@@ -1,0 +1,118 @@
+# Highlighter.tsx
+
+import React from "react";
+import {
+  Puff,
+  Radio,
+  Audio /*import all others here*/,
+} from "react-loader-spinner";
+
+interface HighlighterProps {
+  color: string;
+  size: string;
+  show: "Puff" | "Radio" | "Audio" /*include all types here*/;
+}
+
+export const Highlighter: React.FC<HighlighterProps> = ({
+  color,
+  size,
+  show,
+}) => {
+  // map show to its corresponding Component
+  const componentMap = {
+    Puff: Puff,
+    Radio: Radio,
+    Audio: Audio,
+    // include all others here
+  };
+
+  // get the Component class
+  const Component = componentMap[show];
+
+  return <Component height={size} width={size} color={color} />;
+};
+
+
+<!-- --------- -->
+
+# useHighlight.ts
+
+import { useEffect, useState } from "react";
+
+export const useHighlight = (
+  ids: Array<string>,
+  { color, size }: { color: string; size: string },
+  spinner: string,
+  isInitial: boolean,
+) => {
+  const [elements, setElements] = useState<Array<HTMLElement | null>>([]);
+
+  useEffect(() => {
+    if (isInitial) return;
+    const newElements = ids.map((id) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.style.backgroundColor = color;
+        el.style.fontSize = size;
+      }
+      return el;
+    });
+    setElements(newElements);
+  }, [color, size, spinner, isInitial, ids]);
+
+  return { elements, spinner, color, size };
+};
+
+export default useHighlight;
+
+
+<!-- ------- -->
+
+# App.tsx
+
+// App.tsx
+import { Highlighter } from "./Highlighter";
+import SamplePage from "./SamplePage";
+
+function App() {
+  return (
+    <>
+      <div>
+        <Highlighter color="green" size="20px" show="Puff" />
+      </div>
+      <SamplePage />
+    </>
+  );
+}
+
+export default App;
+
+
+<!-- ------------ -->
+
+# SamplePage.tsx
+
+import { useHighlight } from "./useHighlight";
+
+function SamplePage() {
+  const handleClick = () => {
+    useHighlight(
+      ["my-hello", "customer"],
+      { color: "red", size: "24px" },
+      "Puff",
+      false,
+    );
+  };
+
+  return (
+    <>
+      <div id="my-hello">hello</div>
+      <div id="customer">
+        <h1>the customer site</h1>
+      </div>
+      <button onClick={handleClick}>Click Me</button>
+    </>
+  );
+}
+
+export default SamplePage;
